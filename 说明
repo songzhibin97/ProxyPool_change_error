@@ -1,0 +1,58 @@
+本程序是由GitHub中崔神(崔庆才)所下载
+https://github.com/Python3WebSpider/ProxyPool # GitHub下载地址
+
+ProxyPool
+安装
+安装Python
+至少Python3.5以上
+
+安装Redis
+安装好之后将Redis服务开启
+
+配置代理池
+cd proxypool
+进入proxypool目录，修改settings.py文件
+
+PASSWORD为Redis密码，如果为空，则设置为None
+
+安装依赖
+pip3 install -r requirements.txt
+打开代理池和API
+python3 run.py
+获取代理
+利用requests获取方法如下
+
+import requests
+
+PROXY_POOL_URL = 'http://localhost:5555/random'
+
+def get_proxy():
+    try:
+        response = requests.get(PROXY_POOL_URL)
+        if response.status_code == 200:
+            return response.text
+    except ConnectionError:
+
+
+
+############################
+修改:由于世界运行run.py报错
+    AttributeError: 'int' object has no attribute 'items'
+
+修改了 db.py RedisClient类中的add方法
+
+    def add(self, proxy, score=INITIAL_SCORE):
+        """
+        添加代理，设置分数为最高
+        :param proxy: 代理
+        :param score: 分数
+        :return: 添加结果
+        """
+        if not re.match('\d+\.\d+\.\d+\.\d+\:\d+', proxy):
+            print('代理不符合规范', proxy, '丢弃')
+            return
+        if not self.db.zscore(REDIS_KEY, proxy):
+            mapping = {                             # 增加了mapping
+                proxy: score
+            }
+            return self.db.zadd(REDIS_KEY, mapping) # 将 self.db.zadd(REDIS_KEY,proxy,score) 由于score为分数值 所以抛错 改为如下正常运行
