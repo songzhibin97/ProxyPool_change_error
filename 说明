@@ -56,3 +56,49 @@ def get_proxy():
                 proxy: score
             }
             return self.db.zadd(REDIS_KEY, mapping) # 将 self.db.zadd(REDIS_KEY,proxy,score) 由于score为分数值 所以抛错 改为如下正常运行
+
+
+修改 db.py RedisClient类中的 decrease 方法
+
+        def decrease(self, proxy):
+        """
+        代理值减一分，小于最小值则删除
+        :param proxy: 代理
+        :return: 修改后的代理分数
+        """
+        score = self.db.zscore(REDIS_KEY, proxy)
+        if score and score > MIN_SCORE:
+            print('代理', proxy, '当前分数', score, '减1')
+            return self.db.zincrby(REDIS_KEY, -1, proxy)  # 将 return self.db.zincrby(REDIS_KEY,proxy,-1) 改为
+        else:
+            print('代理', proxy, '当前分数', score, '移除')
+            return self.db.zrem(REDIS_KEY, proxy)
+
+
+#######################
+报错1：
+
+zincrby(REDIS_KEY,proxy,-1)
+redis.exceptions.ResponseError: value is not a valid float
+
+查看文档后发现zincrby（）跟新为
+
+zincrby(self, name, amount, value)
+解决方案： zincrby(REDIS_KEY,-1,proxy)
+
+ 
+ 
+
+报错2：
+
+zadd(REDIS_KEY, score, proxy)
+redis 'int' object has no attribute 'items'
+
+文档更新为
+
+zadd(self, name, mapping, nx=False, xx=False, ch=False, incr=False)
+Set any number of element-name, score pairs to the key ``name``. Pairs
+are specified as a dict of element-names keys to score values.
+解决方案
+
+zadd(REDIS_KEY,{proxy:score})
