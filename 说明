@@ -75,6 +75,15 @@ def get_proxy():
             return self.db.zrem(REDIS_KEY, proxy)
 
 
+修改 db.py RedisClient类中的 max方法
+    def max(self, proxy):
+        """
+        将代理设置为MAX_SCORE
+        :param proxy: 代理
+        :return: 设置结果
+        """
+        print('代理', proxy, '可用，设置为', MAX_SCORE)
+        return self.db.zincrby(REDIS_KEY, MAX_SCORE, proxy) # 将 self.db.add改为此 修改了代理可用还仍然-1的操作
 #######################
 报错1：
 
