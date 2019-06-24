@@ -39,11 +39,15 @@ class RedisClient(object):
         """
         result = self.db.zrangebyscore(REDIS_KEY, MAX_SCORE, MAX_SCORE)
         if len(result):
-            return choice(result)
+            proxy = choice(result)
+            self.db.zrem(REDIS_KEY, proxy)
+            return proxy
         else:
             result = self.db.zrevrange(REDIS_KEY, 0, 100)
             if len(result):
-                return choice(result)
+                proxy = choice(result)
+                self.db.zrem(REDIS_KEY, proxy)
+                return proxy
             else:
                 raise PoolEmptyError
 

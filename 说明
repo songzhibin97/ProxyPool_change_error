@@ -84,6 +84,31 @@ def get_proxy():
         """
         print('代理', proxy, '可用，设置为', MAX_SCORE)
         return self.db.zincrby(REDIS_KEY, MAX_SCORE, proxy) # 将 self.db.add改为此 修改了代理可用还仍然-1的操作
+
+
+
+
+更改 Flask接口 /random 随机出代理后在代理池中删除
+
+   def random(self):
+        """
+        随机获取有效代理，首先尝试获取最高分数代理，如果不存在，按照排名获取，否则异常
+        :return: 随机代理
+        """
+        result = self.db.zrangebyscore(REDIS_KEY, MAX_SCORE, MAX_SCORE)
+        if len(result):
+            proxy = choice(result)              # 修改 在这里将随机的代理存储至中间量
+            self.db.zrem(REDIS_KEY, proxy)      # 修改 调用db.zrem 删除操作
+            return proxy
+        else:
+            result = self.db.zrevrange(REDIS_KEY, 0, 100)
+            if len(result):
+                proxy = choice(result)          # 修改 在这里将随机的代理存储至中间量
+                self.db.zrem(REDIS_KEY, proxy)  # 修改 调用db.zrem 删除操作
+                return proxy
+            else:
+                raise PoolEmptyError
+
 #######################
 报错1：
 

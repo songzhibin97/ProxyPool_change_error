@@ -10,7 +10,7 @@ REDIS_PASSWORD = None
 REDIS_KEY = 'proxies'
 
 # 代理分数
-MAX_SCORE = 10
+MAX_SCORE = 1
 MIN_SCORE = 0
 INITIAL_SCORE = 10
 
